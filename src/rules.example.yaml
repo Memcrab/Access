@@ -1,0 +1,12 @@
+content:
+  roles: [guest, user, admin]
+  services:
+    post: [get]
+    product: [get]
+    index: [get]
+    catalog: [filter]
+manage:
+  roles: [admin]
+  services: 
+    post: [add, save, delete]
+    product: [add, save, delete]
