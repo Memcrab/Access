@@ -5,7 +5,7 @@ content:
     product: [get]
     index: [get]
     catalog: [filter]
-manage:
+contentManage:
   roles: [admin]
   services: 
     post: [add, save, delete]
