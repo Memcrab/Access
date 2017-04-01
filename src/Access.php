@@ -10,55 +10,67 @@ use memCrab\Exceptions\AccessException;
  *  @author Oleksandr Diudiun
  */
 class Access {
-	private $accessMatrix;
+	private $servicesMatrix;
 	private $groupsMatrix;
+	private $rolesMatrix;
+	private $rules;
 
-	public function loadRules(array $rules) {
+	public function loadRules(array $rules): void {
 		if (empty($rules)) {
-			throw new AccessException(_("Empty rules"), 1);
+			throw new AccessException(_("Empty rules"), 500);
 		}
 
-		foreach ($rules as $group => $access) {
-			if (empty($access['roles']) || !is_array($access['roles'])) {
-				throw new AccessException(_("Empty roles in group:") . " " . $group, 401);
+		$this->rules = $rules;
+
+		foreach ($this->rules as $groupName => $accessRule) {
+			if (empty($accessRule['roles']) || !is_array($accessRule['roles'])) {
+				throw new AccessException(_("Empty roles in group:") . " " . $groupName, 500);
 			}
-			if (empty($access['services']) || !is_array($access['services'])) {
-				throw new AccessException(_("Empty services in group:") . " " . $group, 401);
+			if (empty($accessRule['services']) || !is_array($accessRule['services'])) {
+				throw new AccessException(_("Empty services in group:") . " " . $groupName, 500);
 			}
 
-			foreach ($access['services'] as $service) {
-				if (empty($service) || !is_array($service)) {
-					throw new AccessException(_("Empty actions in service:") . " " . $service, 401);
+			foreach ($accessRule['services'] as $serviceName => $actions) {
+				if (empty($actions) || !is_array($actions)) {
+					throw new AccessException(_("Empty actions in service:") . " " . $serviceName, 500);
 				}
-				foreach ($service as $action) {
-					foreach ($access['roles'] as $role) {
-						$this->accessMatrix[$service][$action][$role][] = $group;
-						$this->groupsMatrix[$group][$role][$service][] = $action;
+				foreach ($actions as $action) {
+					foreach ($accessRule['roles'] as $role) {
+						$this->servicesMatrix[$serviceName][$action][$role][] = $groupName;
+						$this->groupsMatrix[$groupName][$role][$serviceName][] = $action;
+						$this->rolesMatrix[$role][$groupName][$serviceName][] = $action;
 					}
 				}
 			}
 		}
 	}
 
-	public function checkRights($service, $action, $userRole) {
-		return isset($this->accessMatrix[$service][$action][$userRole]);
-		// throw new AccessException(_("Undefined Service:") . " " . $service, 401);
+	public function checkRights(string $service, string $action, string $userRole): bool {
+		return isset($this->servicesMatrix[$service][$action][$userRole]);
 	}
 
-	public function getUserAllowedAccessGroups($userRole) {
+	public function getRoleAllowedAccessGroups(string $role): array{
 		$allowedAccessGroups = array();
-
-		if (in_array($userRole, self::$availableRoles)) {
-			foreach ($this->groups as $group) {
-				if (in_array($userRole, $group["roles"])) {
-					$allowedAccessGroups[$group['name']] = $group;
-				}
-			}
-
+		if (!isset($this->rolesMatrix[$role])) {
+			throw new AccessException(_("Role not exist: ") . " " . $role, 401);
 		}
 
-		return $allowedAccessGroups;
+		if (is_array($this->rolesMatrix[$role])) {
+			return array_keys($this->rolesMatrix[$role]);
+		} else {
+			return array();
+		}
 	}
 
-	public function getModels() {return $this->models;}
+	public function getRightsByServices(): array{
+		return $this->servicesMatrix;
+	}
+
+	public function getRightsByRoles(): array{
+		return $this->rolesMatrix;
+	}
+
+	public function getRightsByGroups(): array{
+		return $this->groupsMatrix;
+	}
 }

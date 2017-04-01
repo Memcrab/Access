@@ -1,27 +1,28 @@
 PHP Router as Composer Library 
 ==========================
 ### Status
-[![Build Status](https://travis-ci.org/noonehos/router.svg?branch=master)](https://travis-ci.org/noonehos/router)
+[![Build Status](https://travis-ci.org/noonehos/access.svg?branch=master)](https://travis-ci.org/noonehos/access)
 [![Dependency Status](https://www.versioneye.com/user/projects/588f90c1760ce6003a4ea676/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/588f90c1760ce6003a4ea676)
-[![Total Downloads](https://poser.pugx.org/memcrab/router/downloads)](https://packagist.org/packages/memcrab/router)
-[![Latest Stable Version](https://poser.pugx.org/memcrab/router/version)](https://packagist.org/packages/memcrab/router)
-[![Latest Unstable Version](https://poser.pugx.org/memcrab/router/v/unstable)](//packagist.org/packages/memcrab/router)
-[![License](https://poser.pugx.org/memcrab/router/license)](https://packagist.org/packages/memcrab/router)
-[![composer.lock available](https://poser.pugx.org/memcrab/router/composerlock)](https://packagist.org/packages/memcrab/router)
+[![Total Downloads](https://poser.pugx.org/memcrab/access/downloads)](https://packagist.org/packages/memcrab/access)
+[![Latest Stable Version](https://poser.pugx.org/memcrab/access/version)](https://packagist.org/packages/memcrab/access)
+[![Latest Unstable Version](https://poser.pugx.org/memcrab/access/v/unstable)](//packagist.org/packages/memcrab/access)
+[![License](https://poser.pugx.org/memcrab/access/license)](https://packagist.org/packages/memcrab/access)
+[![composer.lock available](https://poser.pugx.org/memcrab/access/composerlock)](https://packagist.org/packages/memcrab/access)
 
 
-It's php router based on yaml configuration file and support regular expressions in each route condition. 
-Thats help build more accurate routes with only numbers in part of url or with required part of word etc.
+It's lightweight php access rights module.
 
 Features
 --------
 
-* Support RegExp in any kind of route
-* Support multiple routings for single url throw different request methods (POST, GET, PUT, DELETE, ...)
-* Support full url or just request uri
-* All configurations in simple YAML file
-* Each route can return already named params (as many params as you want, or as you have in Regular Expression)
-* High performance yaml parse throw using updated pecl yaml-ext 2.0.0 for php 7.0
+* Support services, actions and roles that need to be controlled by access rights
+* Support access groups that combaine multiple services and actions for access all of them to some role
+* All configurations is array based and it may be simple YAML file
+* Allows you to check role access to any Service/Action
+* Allows to check role access to group of actions
+* Allows you to get all groups that available for current role
+* Allows to use rights matrix by roles or by services or by access groups it's allows you to check any rights by simple isset() using only keys of array.
+* Used High performance yaml parse throw using updated pecl yaml-ext 2.0.0 for php 7.0
 * Strict standart coding with full Typing of params and returns (by php 7.1)
 * PSR-4 autoloading compliant structure
 * Unit-Testing with PHPUnit
@@ -29,7 +30,7 @@ Features
 
 Install
 --------
-```composer require memcrab/router```
+```composer require memcrab/access```
 
 Dependencies
 --------
@@ -54,32 +55,29 @@ php extension YAML:
 
 Usage
 --------
-- init Router: `memCrab\Router()`
-- load routes: `->loadRoutesFromYaml(string $filePath)`
-	- $filePath - Path to yaml files with routes
-- run matching: `->matchRoute(string $url, string $method)`
-	- $url - URL (`http://example.com/posts`) or just request URI of page (`/post`)
-	- $method - http request method
-- use your router data with:
-	- getService() - return component that we call
-	- getAction() - return action that will be run from component
-	- getParams() - return route regExp params
+- init Access: `new memCrab\Access()`
+- load rules: `->loadRules(array $rules)`
+	- $rules - Rules from yaml file for exaple
+- run checks: `->checkRights(string $service, string $action, string $userRole)`
+	- $service - name of service (or maybe controller)
+	- $action - name of action 
+  - $userRole - name of user role
 
 Yaml Config Example
 --------
 ```yaml
-routes:
-  /:
-    GET: [Index, getMain]
-  /post/:
-    GET:    [Post, get]
-    POST:   [Post, add]
-    PATCH:  [Post, save]
-    DELETE: [Post, delete]
-  /post/publish/:
-    POST: [Post, setPublishing]
-  /catalog/([a-zA-Z0-9]+)-([a-zA-Z0-9]+)/: 
-    GET: [Catalog, filter, key1, value1]
+contentView:
+  roles: [guest, user, admin]
+  services:
+    post: [get]
+    product: [get]
+    index: [get]
+    catalog: [filter]
+contentManage:
+  roles: [admin]
+  services: 
+    post: [add, save, delete]
+    product: [add, save, delete]
 ```
 
 
@@ -87,25 +85,22 @@ Run Example
 --------
 ```php
 require_once __DIR__ . "/../vendor/autoload.php";
-
-use memCrab\Router\Router;
-use memCrab\Router\RouterException;
+use memCrab\Exceptions\FileException;
+use memCrab\File\Yaml;
+use memCrab\Access\Access;
+use memCrab\Exception\AccessException;
 
 try {
-  # Initialize Router
-  $Router = new Router();
-  $Router->loadRoutesFromYaml("../src/routs.example.yaml");
+  $Yaml = new Yaml();
+  $rules = $Yaml->load("config/rules.yaml", null)->getContent();
   
-  # Routing
-  $Router->matchRoute("http://example.com/post/", "POST");    
+  $Access = new Access();
+  $Access->loadRules($rules);
   
-  # Run your Controller|Service|Component
-  $ServiceName = $Router->getService();
-  $Service = new $ServiceName();
-  $Action = $Router->getAction();
-  $Response = $Service->$Action($Router->getParams());
+  if(!$Access->checkRights("post", "save", "admin")) throw AccessException("Access Denie.", 401);
+    // do all your work
 }
-catch(RouterException $error){
+catch(AccessException $error){
   $Response = new \YourResponseClass();
   $Response->setErrorResponse($error);
 }
@@ -113,11 +108,6 @@ catch(RouterException $error){
 $Response->sendHeaders();
 $Response->sendContent();
 ```
-
-## TODOS
-
-- [ ] Add support for suffixes - right part of uri that not involved in routing like .html, .php, last "/", etc
-- [ ] Add support for prefixes - left part of uri that not involved in routing like lang part (uk/us/fr/ru) or geo part (europe/asia), etc
 
 ---
 **MIT Licensed**

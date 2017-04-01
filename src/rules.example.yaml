@@ -1,4 +1,4 @@
-content:
+contentView:
   roles: [guest, user, admin]
   services:
     post: [get]
