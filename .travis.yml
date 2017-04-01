@@ -5,4 +5,4 @@ install:
   - printf "\n" | pecl install yaml-2.0.0
   - phpenv rehash
   - composer install
-script: vendor/bin/phpunit
+script: phpunit

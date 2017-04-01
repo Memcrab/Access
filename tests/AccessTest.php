@@ -12,7 +12,7 @@ use memCrab\Exceptions\AccessException;
  *
  *  @author Oleksandr Diudiun
  */
-class AccessTetst extends PHPUnit_Framework_TestCase {
+class AccessTetst extends \PHPUnit\Framework\TestCase {
 	protected $Access;
 	protected $yaml;
 	protected $parsedRules;
