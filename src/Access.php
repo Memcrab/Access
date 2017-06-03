@@ -37,6 +37,6 @@ class Access {
 	}
 
 	public function checkRights(string $role, string $service, string $action): bool {
-		return isset($this->accessMatrix[$service][$action][$userRole]);
+		return in_array($action, $this->accessMatrix[$userRole][$service]);
 	}
 }
