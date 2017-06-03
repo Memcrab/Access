@@ -1,0 +1,12 @@
+contentView:
+  roles: [guest, user, admin]
+  services:
+    post: [get]
+    product: [get]
+    index: [get]
+    catalog: [filter]
+contentManage:
+  roles: [admin]
+  services: 
+    post: [add, save, delete]
+    product: [add, save, delete]
