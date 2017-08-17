@@ -36,7 +36,13 @@ class Access {
 		}
 	}
 
-	public function checkRights(string $role, string $service, string $action): bool {
-		return in_array($action, $this->accessMatrix[$userRole][$service]);
+	public function checkRights(string $role, string $service, string $action): bool{
+		$Ref = new \ReflectionClass($service);
+		var_dump($this->accessMatrix, $Ref->getShortName(), $action, $role);
+		if (isset($this->accessMatrix[$role][$Ref->getShortName()])) {
+			return in_array($action, $this->accessMatrix[$role][$Ref->getShortName()]);
+		} else {
+			return false;
+		}
 	}
 }
