@@ -1,6 +1,6 @@
 <?php
 declare (strict_types = 1);
-namespace memCrab\Access;
+namespace Memcrab\Access;
 
 use memCrab\Exceptions\AccessException;
 
