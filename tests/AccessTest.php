@@ -1,8 +1,8 @@
 <?php
 require_once __DIR__ . "/../vendor/autoload.php";
 
-use memCrab\Access\Access;
-use memCrab\Exceptions\AccessException;
+use Memcrab\Access\Access;
+use Memcrab\Access\AccessException;
 
 /**
  *  Corresponding Class to test Access class
@@ -12,7 +12,7 @@ use memCrab\Exceptions\AccessException;
  *
  *  @author Oleksandr Diudiun
  */
-class AccessTetst extends \PHPUnit\Framework\TestCase {
+class AccessTest extends \PHPUnit\Framework\TestCase {
 	protected $Access;
 	protected $yaml;
 	protected $parsedRules;

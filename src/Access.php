@@ -2,7 +2,7 @@
 declare (strict_types = 1);
 namespace Memcrab\Access;
 
-use memCrab\Exceptions\AccessException;
+use Memcrab\Access\AccessException;
 
 /**
  *  Router for core project
