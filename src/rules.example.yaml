@@ -1,6 +1,6 @@
 contentView:
   roles: [guest, user, admin]
-  frontName: [contentViewRule]
+  names: [contentViewRule]
   services:
     post: [get]
     product: [get]
@@ -8,7 +8,7 @@ contentView:
     catalog: [filter]
 contentManage:
   roles: [admin]
-  frontName: [manageRule]
+  names: [manageRule]
   services: 
     post: [add, save, delete]
     product: [add, save, delete]

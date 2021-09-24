@@ -13,7 +13,7 @@ class Access {
 	private $rules;
 	private $accessMatrix;
 
-    private static $accessFrontNamesMatrix = [];
+    private static $accessNamesMatrix = [];
 
     public function loadRules(array $rules): void {
 		if (empty($rules)) {
@@ -30,8 +30,8 @@ class Access {
 			if (empty($accessRule['services'])) {
 				throw new AccessException(_("Empty services in Access Group:") . " " . $groupName, 500);
 			}
-            if (empty($accessRule['frontNames'])) {
-                throw new AccessException(_("Empty frontNames in Access Group:") . " " . $groupName, 500);
+            if (empty($accessRule['names'])) {
+                throw new AccessException(_("Empty names in Access Group:") . " " . $groupName, 500);
             }
 
 			$this->accessMatrix = array_merge_recursive(
@@ -39,9 +39,9 @@ class Access {
 				array_fill_keys($accessRule['roles'], $accessRule['services'])
 			);
 
-            self::$accessFrontNamesMatrix = array_merge_recursive(
-                self::$accessFrontNamesMatrix,
-                array_fill_keys($accessRule['roles'], $accessRule['frontNames'])
+            self::$accessNamesMatrix = array_merge_recursive(
+                self::$accessNamesMatrix,
+                array_fill_keys($accessRule['roles'], $accessRule['names'])
             );
 		}
 	}
@@ -55,8 +55,8 @@ class Access {
 		}
 	}
 
-    public static function getFrontNamesByRole(string $role): array
+    public static function getNamesByRole(string $role): array
     {
-        return isset(self::$accessFrontNamesMatrix[$role]) ? self::$accessFrontNamesMatrix[$role] : [];
+        return isset(self::$accessNamesMatrix[$role]) ? self::$accessNamesMatrix[$role] : [];
     }
 }
